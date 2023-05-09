@@ -19,12 +19,15 @@ class TomAndJerryEnvironment:
             self.mirrorY = np.random.randint(0,1)
             self.speed = np.random.choice([-1,1],size=1)
             
+            self.eating = 0
+            
             self.path = [
                 [(0,),(1,11),(2,10)],
                 [(5,15),(4,12),(3,9)],
                 [(6,14),(7,13),(8,)]
             ]
             self.transformPath()
+            
 
         def transformPath(self):
             """
@@ -38,11 +41,26 @@ class TomAndJerryEnvironment:
             if self.mirrorY:
                 self.path = [x[::-1] for x in self.path]    
 
-        def step(self):
+        def step(self,treats):
             """
             Adjust the timestep, and thus the position when called
             """
-            self.time = (self.time+self.speed+16)%16
+            # Get position
+            pos = self.mid + self.pos()
+            toBeDeleted = []
+            
+            for treat in treats:
+                if np.all(pos == treat):
+                    toBeDeleted.append(treat)
+                    self.eating += 2
+            
+            for treat in toBeDeleted:
+                treats.remove(treat)
+            
+            if not self.eating:
+                self.time = (self.time+self.speed+16)%16
+            else:
+                self.eating -= 1
 
         def pos(self):
             """
@@ -77,8 +95,9 @@ class TomAndJerryEnvironment:
         self.goal = np.array((5,6))
         self.done = False
         self.state = self.reset()
-        self.treats = 1
-
+        self.nr_treats = 1
+        self.treats = []
+        
         self._render_setup()
 
     def stateToPos(self,s):
@@ -100,8 +119,9 @@ class TomAndJerryEnvironment:
         np.random.seed(seed)
 
         self.done = False
-        self.treats = 1
-
+        self.nr_treats = 1
+        self.treats = []
+        
         self.cats = [
             self.Cat((1,5)),
             self.Cat((5,3))
@@ -114,15 +134,18 @@ class TomAndJerryEnvironment:
         """
         Returns the step definitions by action.
         """
-        return {0:np.array((0,-1)),1:np.array((0,1)),2:np.array((-1,0)),3:np.array((1,0)),4:np.array((0,0))}
+        return {0:np.array((0,-1)),1:np.array((-1,0)),2:np.array((0,1)),3:np.array((1,0)),4:np.array((0,0))}
        
     def step(self,a):
         ''' Forward the environment based on action a 
         Returns the next state, the obtained reward, and a boolean whether the environment terminated '''
+        
+        # If treats available, lay one down
+        if a == 4 and self.nr_treats > 0:
+            self.nr_treats -= 1
+            self.treats.append(self.stateToPos(self.state))
+        
         # info
-        if a == 4:
-            self.treats -= 1
-
         info = {'treatsLeft':self.treats}
 
         # Move the agent
@@ -134,7 +157,7 @@ class TomAndJerryEnvironment:
         # if cat is hit
         for cat in self.cats:
             mid = cat.mid
-            cat.step()
+            cat.step(self.treats)
             delta = cat.pos()
             pos = mid+delta
             if np.all(s_next == pos):
@@ -164,6 +187,9 @@ class TomAndJerryEnvironment:
         """
         curMap = [[x for x in row] for row in self.env]
 
+        for treat in self.treats:
+            curMap[treat[1]][treat[0]] = "T"
+            
         for cat in self.cats:
             mid = cat.mid
             delta = cat.pos()
@@ -192,8 +218,8 @@ class TomAndJerryEnvironment:
         """
         plt.ion()
         self.fig, self.axs = plt.subplots(1,1)
-        self.cmap = mpl.colors.ListedColormap(['white','black','green','orange','yellow'])
-        self.bounds= np.array(range(6))
+        self.cmap = mpl.colors.ListedColormap(['white','black','green','orange','yellow','blue'])
+        self.bounds= np.array(range(7))
         self.norm = mpl.colors.BoundaryNorm(self.bounds, self.cmap.N)
 
     def render(self):
@@ -203,7 +229,7 @@ class TomAndJerryEnvironment:
         curMap = self.__str__().rstrip().split('\n')
         newMap = []
         for row in curMap:
-            row = row.replace('M','4').replace('C','3').replace('G','2')
+            row = row.replace('M','4').replace('C','3').replace('G','2').replace('T','5')
             row = np.array([int(x) for x in row])
             newMap.append(row)
         newMap = np.array(newMap)
@@ -233,7 +259,8 @@ def test():
 
     # Test
     while not done:
-        a = np.random.randint(4) # sample random action    
+        a = int(input())
+        #a = np.random.randint(5) # sample random action    
         s_next,r,done,info = env.step(a) # execute action in the environment
         #env.render(Q_sa=Q_sa,plot_optimal_policy=False,step_pause=step_pause) # display the environment
         env.render()
