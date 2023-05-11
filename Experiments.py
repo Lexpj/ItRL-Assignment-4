@@ -35,7 +35,6 @@ def run_repetitions(agent_type, n_episodes = 10000, n_rep = 100, alpha = 0.1, ga
                     # S = S'
                     state = stateprime
                  
-        
 
     elif agent_type == "SARSA":
         

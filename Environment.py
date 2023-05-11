@@ -89,7 +89,7 @@ class TomAndJerryEnvironment:
         self.height = 8
 
         self.n_states = self.height * self.width
-        self.n_actions = 4
+        self.n_actions = 5
                 
         self.cats = []
         self.goal = np.array((5,6))
@@ -127,7 +127,6 @@ class TomAndJerryEnvironment:
             self.Cat((1,5)),
             self.Cat((5,3))
         ]
-        self.cats = []
 
         s = self.posToState((0,1))
         return s
