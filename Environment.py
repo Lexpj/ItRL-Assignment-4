@@ -61,6 +61,9 @@ class TomAndJerryEnvironment:
                 self.time = (self.time+self.speed+16)%16
             else:
                 self.eating -= 1
+            
+            return self.eating > 0
+
 
         def pos(self):
             """
@@ -84,6 +87,13 @@ class TomAndJerryEnvironment:
             '0001000',
             '0000000'
         ]
+
+        self.rewards = {
+            'cat': -10,
+            'step': -1,
+            'goal': 30,
+            'eating': 50
+        }
 
         self.width = 7
         self.height = 8
@@ -125,10 +135,12 @@ class TomAndJerryEnvironment:
         
         self.cats = [
             self.Cat((1,5)),
-            self.Cat((5,3))
+            self.Cat((5,3)),
+            self.Cat((5,6))
         ]
 
         s = self.posToState((0,1))
+        self.state = s
         return s
 
     def state_size(self):
@@ -147,6 +159,7 @@ class TomAndJerryEnvironment:
         ''' Forward the environment based on action a 
         Returns the next state, the obtained reward, and a boolean whether the environment terminated '''
         
+        r = 0
         # If treats available, lay one down
         if a == 4 and self.nr_treats > 0:
             self.nr_treats -= 1
@@ -164,12 +177,14 @@ class TomAndJerryEnvironment:
         # if cat is hit
         for cat in self.cats:
             mid = cat.mid
-            cat.step(self.treats)
+            eating = cat.step(self.treats)
+            if eating: r += self.rewards['eating'] 
+
             delta = cat.pos()
             pos = mid+delta
             if np.all(s_next == pos):
                 self.done = True
-                r = -50
+                r += self.rewards['cat']
                 return s_next, r, self.done, info
 
         # check if wall is hit
@@ -181,10 +196,10 @@ class TomAndJerryEnvironment:
         # Check reward and termination
         if np.all(s_next == self.goal):
             self.done = True
-            r = 20
+            r += self.rewards['goal']
         else:
             self.done = False
-            r = -1
+            r += self.rewards['step']
         
         return self.state, r, self.done, info
 
