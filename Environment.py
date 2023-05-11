@@ -73,7 +73,7 @@ class TomAndJerryEnvironment:
                         return np.array([j-1,i-1])
             raise Exception("Cat made invalid move") # shouldn't occur
 
-    def __init__(self):        
+    def __init__(self, render_mode = None):        
         self.env = [
             '0000000',
             '0000011',
@@ -89,7 +89,7 @@ class TomAndJerryEnvironment:
         self.height = 8
 
         self.n_states = self.height * self.width
-        self.n_actions = 5
+        self.n_actions = 4
                 
         self.cats = []
         self.goal = np.array((5,6))
@@ -98,7 +98,8 @@ class TomAndJerryEnvironment:
         self.nr_treats = 1
         self.treats = []
         
-        self._render_setup()
+        if render_mode == "human":
+            self._render_setup()
 
     def stateToPos(self,s):
         """
@@ -126,10 +127,17 @@ class TomAndJerryEnvironment:
             self.Cat((1,5)),
             self.Cat((5,3))
         ]
+        self.cats = []
 
         s = self.posToState((0,1))
         return s
 
+    def state_size(self):
+        return self.n_states
+    
+    def action_size(self):
+        return self.n_actions
+    
     def _get_action_definitions(self):
         """
         Returns the step definitions by action.
@@ -162,7 +170,7 @@ class TomAndJerryEnvironment:
             pos = mid+delta
             if np.all(s_next == pos):
                 self.done = True
-                r = -10
+                r = -50
                 return s_next, r, self.done, info
 
         # check if wall is hit
@@ -179,7 +187,7 @@ class TomAndJerryEnvironment:
             self.done = False
             r = -1
         
-        return s_next, r, self.done, info
+        return self.state, r, self.done, info
 
     def __str__(self):
         """
@@ -251,7 +259,7 @@ def test():
     step_pause = 0.5
     
     # Initialize environment and Q-array
-    env = TomAndJerryEnvironment()
+    env = TomAndJerryEnvironment(render_mode="human")
     env.reset()
     Q_sa = np.zeros((env.n_states,env.n_actions)) # Q-value array of flat zeros
 
@@ -259,8 +267,8 @@ def test():
 
     # Test
     while not done:
-        a = int(input())
-        #a = np.random.randint(5) # sample random action    
+        #a = int(input())
+        a = np.random.randint(5) # sample random action    
         s_next,r,done,info = env.step(a) # execute action in the environment
         #env.render(Q_sa=Q_sa,plot_optimal_policy=False,step_pause=step_pause) # display the environment
         env.render()
