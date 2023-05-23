@@ -68,6 +68,7 @@ class TomAndJerryEnvironment:
         self.n_actions = 4
                 
         self.cats = []
+        self.info = {}
         self.goal = np.array((4,3))
         self.done = False
         self.state = self.reset()
@@ -94,8 +95,8 @@ class TomAndJerryEnvironment:
         np.random.seed(seed)
 
         self.done = False
-        self.treats = []
-        
+        self.info = {'via':None}
+
         self.cats = [
             self.Cat((0,2)),
             self.Cat((3,0))
@@ -132,14 +133,17 @@ class TomAndJerryEnvironment:
         
         r = 0
         
-        # info
-        info = {}
-        
         # Move the agent
         s_next = self.stateToPos(self.state) + self._get_action_definitions()[a] 
         # bound within grid
         s_next[0] = min(max(0,s_next[0]),self.width-1)
         s_next[1] = min(max(0,s_next[1]),self.height-1)
+
+        # Generate info: if clear via upwards or downwards, denote in info
+        if s_next[0] >= 3 and s_next[1] <= 1:
+            self.info['via'] = 'up'
+        elif s_next[0] <= 1 and s_next[1] >= 3:
+            self.info['via'] = 'down'
 
         # if cat is hit
         for cat in self.cats:
@@ -154,11 +158,11 @@ class TomAndJerryEnvironment:
             if np.all(s_next == pos):
                 self.done = True
                 r += self.rewards['cat']
-                return s_next, r, self.done, info
+                return s_next, r, self.done, self.info
             elif np.all(oldpos == s_next) and np.all(self.stateToPos(self.state) == delta):
                 self.done = True
                 r += self.rewards['cat']
-                return s_next, r, self.done, info
+                return s_next, r, self.done, self.info
 
         # check if not wall is hit
         if self.env[s_next[1]][s_next[0]] != '1':
@@ -172,7 +176,8 @@ class TomAndJerryEnvironment:
             self.done = False
             r += self.rewards['step']
         
-        return self.state, r, self.done, info
+        
+        return self.state, r, self.done, self.info
 
     def __str__(self):
         """
