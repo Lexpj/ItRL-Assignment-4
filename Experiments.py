@@ -9,7 +9,7 @@ from Helper import LearningCurvePlot, ComparisonPlot, smooth, plotarrows, render
 def run_repetitions(agent_type, n_episodes = 10000, n_rep = 100, alpha = 0.1, gamma = 1.0, epsilon = 0.3):
     
     res = np.zeros((n_rep, n_episodes))
-    env = TomAndJerryEnvironment(render_mode=None)
+    env = TomAndJerryEnvironmentTunnel(render_mode=None)
     
     if agent_type == "Q_Learning":
 
@@ -44,7 +44,7 @@ def experimenttest():
     
     learning_curve = LearningCurvePlot()
 
-    agent, res = run_repetitions(agent_type = "Q_Learning", n_rep = 1, n_episodes = 2000)
+    agent, res = run_repetitions(agent_type = "Q_Learning", n_rep = 10, n_episodes = 10000)
     averaged_rewards = res.mean(axis=0)
 
     learning_curve.add_curve(smooth(y = averaged_rewards, window = smoothing_window))
@@ -58,7 +58,7 @@ def main():
     agent = experimenttest()
 
     # Initialize environment and Q-array
-    env = TomAndJerryEnvironment(render_mode="human")
+    env = TomAndJerryEnvironmentTunnel(render_mode="human")
     s = env.reset()
 
     done = False
