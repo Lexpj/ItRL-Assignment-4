@@ -16,6 +16,12 @@ class QLearningAgent(object):
         
     def update(self, state, action, reward, stateprime, alpha = 0.1, gamma = 1):
         self.Q[state][action] = self.Q[state][action] + alpha * (reward + gamma * np.max(self.Q[stateprime]) - self.Q[state][action])
+    
+    def save(self):
+        np.savetxt('QLearning.csv', self.Q, delimiter=',')
+
+    def load(self, path="QLearning.csv"):
+        self.Q = np.loadtxt(path, delimiter=',')
 
 class SARSAAgent(object):
 
@@ -33,6 +39,12 @@ class SARSAAgent(object):
         
     def update(self, state, action, reward, stateprime, actionprime, alpha = 0.1, gamma = 1):
         self.Q[state][action] = self.Q[state][action] + alpha * (reward + gamma * self.Q[stateprime][actionprime] - self.Q[state][action])
+    
+    def save(self):
+        np.savetxt('SARSA.csv', self.Q, delimiter=',')
+
+    def load(self, path="SARSA.csv"):
+        self.Q = np.loadtxt(path, delimiter=',')
 
 
 class ExpectedSARSAAgent(object):
@@ -55,3 +67,9 @@ class ExpectedSARSAAgent(object):
         prob[np.argmax(self.Q[state])] = 1 - self.epsilon
         self.Q[state][action] = self.Q[state][action] + alpha * (reward + gamma * sum([prob[a] * self.Q[stateprime][a] 
                                                                                      for a in range(self.n_actions)]) - self.Q[state][action])
+    
+    def save(self):
+        np.savetxt('ExpectedSARSA.csv', self.Q, delimiter=',')
+
+    def load(self, path="ExpectedSARSA.csv"):
+        self.Q = np.loadtxt(path, delimiter=',')

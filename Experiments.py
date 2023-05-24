@@ -95,6 +95,8 @@ def run_repetitions(agent_type, n_episodes = 1000, n_repetitions = 100, alpha = 
                     # Update the Q-table
                     agent.update(s, a, r, s_prime, alpha = alpha, gamma = gamma)
                     s = s_prime        
+
+    agent.save()
     return cumulative_rewards
 
 
@@ -137,7 +139,7 @@ def optimal_agents_plot(n_repetitions = 100, n_episodes = 1000, optimal_alpha = 
 
 def main():
     # Averaged learning plots
-    #averaged_learning_curve_plot(agent_type = 'Q-learning', n_repetitions = 1, n_episodes = 100)
+    # averaged_learning_curve_plot(agent_type = 'Q-learning', n_repetitions = 1, n_episodes = 100)
     #averaged_learning_curve_plot(agent_type = 'SARSA', n_repetitions = 1, n_episodes = 1000)
     #averaged_learning_curve_plot(agent_type = 'Expected SARSA', n_episodes = 1000)
     

@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import time
+from Agents import *
 
 class TomAndJerryEnvironment:
 
@@ -243,18 +244,31 @@ def test():
     
     # Initialize environment and Q-array
     env = TomAndJerryEnvironment(render_mode="human")
-    env.reset()
+    s = env.reset()
     Q_sa = np.zeros((env.n_states,env.n_actions)) # Q-value array of flat zeros
 
+    agent = ExpectedSARSAAgent(n_actions=env.action_size(), n_states=env.state_size(), epsilon=0.01)
+    agent.load()
     done = False
+
+    heatmap = [0]*env.state_size()
 
     # Test
     while not done:
         #a = int(input())
-        a = np.random.randint(4) # sample random action    
+        heatmap[s] += 1
+
+        a = agent.select_action(s)   
         s_next,r,done,info = env.step(a) # execute action in the environment
-        #env.render(Q_sa=Q_sa,plot_optimal_policy=False,step_pause=step_pause) # display the environment
+        if done:
+            done = False
+            s = env.reset()
+            print(heatmap)
+        else:
+            s = s_next
         env.render()
+
+        
     print(env)
     
 if __name__ == '__main__':
