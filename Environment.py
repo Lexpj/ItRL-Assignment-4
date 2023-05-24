@@ -4,6 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import time
 
 class TomAndJerryEnvironment:
 
@@ -48,28 +49,27 @@ class TomAndJerryEnvironment:
 
     def __init__(self, render_mode = None):        
         self.env = [
-            '00000',
-            '00100',
-            '00100',
-            '00100',
-            '00000'
+            '0000',
+            '0000',
+            '0000',
+            '0000'
         ]
 
         self.rewards = {
-            'cat': -10,
+            'cat': -15,
             'step': -1,
             'goal': 30,
         }
 
-        self.width = 5
-        self.height = 5
+        self.width = 4
+        self.height = 4
 
         self.n_states = self.height * self.width
-        self.n_actions = 4
+        self.n_actions = 8
                 
         self.cats = []
         self.info = {}
-        self.goal = np.array((4,3))
+        self.goal = np.array((3,3))
         self.done = False
         self.state = self.reset()
         
@@ -98,15 +98,9 @@ class TomAndJerryEnvironment:
         self.info = {'via':None}
 
         self.cats = [
-            self.Cat((0,2)),
-            self.Cat((3,0))
+            self.Cat((1,1))
         ]
         self.cats[0].setPath([
-            [(0,),(1,)],
-            [(5,),(2,)],
-            [(4,),(3,)]
-        ])
-        self.cats[1].setPath([
             [(0,),(1,)],
             [(3,),(2,)],
         ])
@@ -125,7 +119,8 @@ class TomAndJerryEnvironment:
         """
         Returns the step definitions by action.
         """
-        return {0:np.array((0,-1)),1:np.array((-1,0)),2:np.array((0,1)),3:np.array((1,0))}
+        return {0:np.array((0,-1)),1:np.array((-1,0)),2:np.array((0,1)),3:np.array((1,0)), 
+                4:np.array((1,1)), 5:np.array((1,-1)), 6:np.array((-1,1)), 7:np.array((-1,-1))}
        
     def step(self,a):
         ''' Forward the environment based on action a 
@@ -213,8 +208,8 @@ class TomAndJerryEnvironment:
         """
         plt.ion()
         self.fig, self.axs = plt.subplots(1,1)
-        self.cmap = mpl.colors.ListedColormap(['white','black','green','orange','yellow','blue'])
-        self.bounds= np.array(range(7))
+        self.cmap = mpl.colors.ListedColormap(['white','black','green','orange','blue'])
+        self.bounds= np.array(range(6))
         self.norm = mpl.colors.BoundaryNorm(self.bounds, self.cmap.N)
 
     def render(self):
@@ -228,6 +223,7 @@ class TomAndJerryEnvironment:
             row = np.array([int(x) for x in row])
             newMap.append(row)
         newMap = np.array(newMap)
+        time.sleep(0.1)
 
         self.axs.cla()
 
@@ -260,7 +256,6 @@ def test():
         #env.render(Q_sa=Q_sa,plot_optimal_policy=False,step_pause=step_pause) # display the environment
         env.render()
     print(env)
-
+    
 if __name__ == '__main__':
     test()
-
