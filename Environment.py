@@ -184,9 +184,6 @@ class TomAndJerryEnvironment:
         Returns the map when `print(env)` is called
         """
         curMap = [[x for x in row] for row in self.env]
-
-        for treat in self.treats:
-            curMap[treat[1]][treat[0]] = "T"
             
         for cat in self.cats:
             coord = cat.coord
