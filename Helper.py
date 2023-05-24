@@ -20,7 +20,8 @@ class LearningCurvePlot:
         self.fig,self.ax = plt.subplots()
         self.ax.set_xlabel('Episode')
         self.ax.set_ylabel('Cumulative reward')      
-        #self.ax.set_ylim([-200, 0])
+        self.ax.set_ylim([10, 25])
+        self.ax.grid(axis="y", color = "#D7DBDD")
         if title is not None:
             self.ax.set_title(title)
         
@@ -34,7 +35,7 @@ class LearningCurvePlot:
         
     def save(self,name='test.png'):
         ''' name: string for filename of saved figure '''
-        self.ax.legend()
+        self.ax.legend(loc='lower right')
         self.fig.savefig(name,dpi=300)
 
 class ComparisonPlot:

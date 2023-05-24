@@ -184,7 +184,7 @@ def test():
     step_pause = 0.5
     
     # Initialize environment and Q-array
-    env = WindyGridworld()
+    env = TomAndJerryEnv()
     env.reset()
     Q_sa = np.zeros((env.n_states,env.n_actions)) # Q-value array of flat zeros
 
