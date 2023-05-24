@@ -58,7 +58,7 @@ class TomAndJerryEnvironment:
 
         self.rewards = {
             'cat': -15,
-            'step': -1,
+            'step': -6,
             'goal': 30,
         }
 
@@ -247,7 +247,7 @@ def test():
     s = env.reset()
     Q_sa = np.zeros((env.n_states,env.n_actions)) # Q-value array of flat zeros
 
-    agent = ExpectedSARSAAgent(n_actions=env.action_size(), n_states=env.state_size(), epsilon=0.01)
+    agent = QLearningAgent(n_actions=env.action_size(), n_states=env.state_size(), epsilon=0.01)
     agent.load()
     done = False
 

@@ -148,7 +148,7 @@ def main():
     #varying_alpha_plot(agent_type = 'SARSA')
     #varying_alpha_plot(agent_type = 'Expected SARSA')
     
-    optimal_agents_plot(n_episodes = 3000)
+    optimal_agents_plot(n_episodes = 1000)
 
 
 if __name__ == '__main__':
