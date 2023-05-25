@@ -57,8 +57,8 @@ class TomAndJerryEnvironment:
         ]
 
         self.rewards = {
-            'cat': -15,
-            'step': -6,
+            'cat': -10,
+            'step': -1,
             'goal': 30,
         }
 
@@ -96,7 +96,22 @@ class TomAndJerryEnvironment:
         np.random.seed(seed)
 
         self.done = False
-        self.info = {'via':None}
+        self.info = {'pathLength':0}
+
+        self.cats = [
+            self.Cat((1,1))
+        ]
+        self.cats[0].setPath([
+            [(0,),(1,)],
+            [(3,),(2,)],
+        ])
+        
+        s = self.posToState((0,0))
+        self.state = s
+        return s
+
+    def shallow_reset(self):
+        self.done = False
 
         self.cats = [
             self.Cat((1,1))
@@ -136,10 +151,7 @@ class TomAndJerryEnvironment:
         s_next[1] = min(max(0,s_next[1]),self.height-1)
 
         # Generate info: if clear via upwards or downwards, denote in info
-        if s_next[0] >= 3 and s_next[1] <= 1:
-            self.info['via'] = 'up'
-        elif s_next[0] <= 1 and s_next[1] >= 3:
-            self.info['via'] = 'down'
+        self.info['pathLength'] += 1
 
         # if cat is hit
         for cat in self.cats:
@@ -152,12 +164,12 @@ class TomAndJerryEnvironment:
             pos = coord+delta
             
             if np.all(s_next == pos):
-                self.done = True
                 r += self.rewards['cat']
+                s_next = self.shallow_reset()
                 return s_next, r, self.done, self.info
             elif np.all(oldpos == s_next) and np.all(self.stateToPos(self.state) == delta):
-                self.done = True
                 r += self.rewards['cat']
+                s_next = self.shallow_reset()
                 return s_next, r, self.done, self.info
 
         # check if not wall is hit
@@ -171,7 +183,6 @@ class TomAndJerryEnvironment:
         else:
             self.done = False
             r += self.rewards['step']
-        
         
         return self.state, r, self.done, self.info
 
@@ -243,7 +254,7 @@ def test():
     step_pause = 0.5
     
     # Initialize environment and Q-array
-    env = TomAndJerryEnvironment(render_mode="human")
+    env = TomAndJerryEnvironment(render_mode=None)
     s = env.reset()
     Q_sa = np.zeros((env.n_states,env.n_actions)) # Q-value array of flat zeros
 
@@ -254,22 +265,24 @@ def test():
     heatmap = [0]*env.state_size()
 
     # Test
-    while not done:
-        #a = int(input())
-        heatmap[s] += 1
+    for i in range(1000):
+        while not done:
+            #a = int(input())
+            heatmap[s] += 1
 
-        a = agent.select_action(s)   
-        s_next,r,done,info = env.step(a) # execute action in the environment
-        if done:
-            done = False
-            s = env.reset()
-            print(heatmap)
-        else:
-            s = s_next
-        env.render()
+            a = agent.select_action(s)   
+            s_next,r,done,info = env.step(a) # execute action in the environment
+            if done:
+                s = env.reset()
+            else:
+                s = s_next
 
-        
-    print(env)
+    heatmap = np.array(heatmap)
+    heatmap = np.reshape(heatmap, (4,4))
+    print(heatmap)
+
+    plt.imshow(heatmap, cmap='autumn')
+    plt.show()
     
 if __name__ == '__main__':
     test()

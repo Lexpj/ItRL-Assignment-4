@@ -8,14 +8,14 @@ import numpy as np
 
 from Environment import *
 from Agents import *
-from Helper import LearningCurvePlot, ComparisonPlot, smooth, plotarrows, render_policy
+from Helper import LearningCurvePlot, ComparisonPlot, smooth
 
 ## Runs an experiment n_episodes times for n_repetitions for the agent_type ##
 def run_repetitions(agent_type, n_episodes = 1000, n_repetitions = 100, alpha = 0.1, gamma = 1.0, epsilon = 0.01):
     # Initialize the cumulative rewards array and the environment
     cumulative_rewards = np.zeros((n_repetitions, n_episodes))
     env = TomAndJerryEnvironment(render_mode = None)
-    info = {}
+
     # Q-learning agent
     if agent_type == "Q-learning":
         # Conduct the experiment n_repetitions
@@ -121,7 +121,7 @@ def varying_alpha_plot(agent_type, n_repetitions = 100, n_episodes = 1000, alpha
     plot.save(name = agent_type + '_various_alpha.png')      
     
 ## Plotting the averaged cumulative rewards for all three agents ##
-def optimal_agents_plot(n_repetitions = 100, n_episodes = 1000, optimal_alpha = [0.1, 0.1, 0.1]):
+def optimal_agents_plot(n_repetitions = 10, n_episodes = 500, optimal_alpha = [0.1, 0.1, 0.1]):
     cum_rewards_QLearning = run_repetitions(agent_type = "Q-learning", n_repetitions = n_repetitions, n_episodes = n_episodes, epsilon = optimal_alpha[0])
     avg_cumulative_rewards_QLearning = cum_rewards_QLearning.mean(axis = 0)
     cum_rewards_SARSA = run_repetitions(agent_type = "SARSA", n_repetitions = n_repetitions, n_episodes = n_episodes, epsilon = optimal_alpha[1])

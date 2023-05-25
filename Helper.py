@@ -11,7 +11,6 @@ By Thomas Moerland
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
-import pygame
 
 
 class LearningCurvePlot:
@@ -20,7 +19,7 @@ class LearningCurvePlot:
         self.fig,self.ax = plt.subplots()
         self.ax.set_xlabel('Episode')
         self.ax.set_ylabel('Cumulative reward')      
-        self.ax.set_ylim([-10, 25])
+        self.ax.set_ylim([15, 27])
         self.ax.grid(axis="y", color = "#D7DBDD")
         if title is not None:
             self.ax.set_title(title)
@@ -67,56 +66,6 @@ def smooth(y, window, poly=1):
     y: vector to be smoothed 
     window: size of the smoothing window '''
     return savgol_filter(y,window,poly)
-
-# Makes a plot of the action with the maximum value for each stat
-def plotarrows(s: str, path: str) -> None:
-    WIDTH = 768
-    HEIGHT = 768
-    TILEWIDTH = WIDTH//12
-    TILEHEIGHT = HEIGHT//12
-    surface = pygame.Surface((WIDTH,HEIGHT))
-    surface.fill((255,255,255))
-    arrow = pygame.transform.scale(pygame.image.load("arrow.png"), (TILEWIDTH,TILEHEIGHT))
-    # Draw grid
-    for i, item in enumerate(s):
-        # If one of the starting positions (not represented in s, therefore this if)
-        if i == 26 or i == 110:
-            pygame.draw.rect(surface, (0,0,255), ((i%12)*TILEWIDTH,(i//12)*TILEHEIGHT,TILEWIDTH,TILEHEIGHT))
-        if item in "UDLR":
-            arr = arrow.copy()
-            if item == "U": arr = pygame.transform.rotate(arr, 90)
-            elif item == "D": arr = pygame.transform.rotate(arr, 270)
-            elif item == "L": arr = pygame.transform.rotate(arr, 180) 
-            surface.blit(arr,((i%12)*TILEWIDTH,(i//12)*TILEHEIGHT))
-        else:
-            if item == "G": pygame.draw.rect(surface, (0,255,0), ((i%12)*TILEWIDTH,(i//12)*TILEHEIGHT,TILEWIDTH,TILEHEIGHT))
-            elif item == "C": pygame.draw.rect(surface, (255,0,0), ((i%12)*TILEWIDTH,(i//12)*TILEHEIGHT,TILEWIDTH,TILEHEIGHT))
-    # Draw lines on the surface
-    for i in range(12):
-        pygame.draw.line(surface, (0,0,0), (TILEWIDTH*i, 0), (TILEWIDTH*i, HEIGHT))
-        pygame.draw.line(surface, (0,0,0), (0,TILEHEIGHT*i), (WIDTH,TILEHEIGHT*i))
-    pygame.draw.line(surface, (0,0,0), (WIDTH-1, 0), (WIDTH-1, HEIGHT))
-    pygame.draw.line(surface, (0,0,0), (0,HEIGHT-1), (WIDTH,HEIGHT-1))  
-    pygame.image.save(surface,path)
-
-# Renders the (optimal) greedy trail of an trained agent 
-def render_policy(env, agent):
-    s = ""
-    for r in range(env.r):
-        for c in range(env.c):
-            if env.s[r][c] == "X":
-                a = np.argmax(agent.Q[r * env.c + c])
-                if a == 0:
-                    s += "U"
-                elif a == 1:
-                    s += "D"
-                elif a == 2:
-                    s += "L"
-                elif a == 3:
-                    s += "R"
-            else:
-                s += env.s[r][c]
-    return s
 
 if __name__ == '__main__':
     # Test Learning curve plot
