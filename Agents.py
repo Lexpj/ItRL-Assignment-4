@@ -1,3 +1,10 @@
+"""
+ItRL: Assignment 4
+Leiden University
+Lex Jansssens and Maksim Terentev
+Last changes 26-05-2023
+"""
+
 import numpy as np
 from os import listdir
 from os.path import isfile, join
@@ -73,7 +80,6 @@ class ExpectedSARSAAgent(object):
         prob[np.argmax(self.Q[state])] = 1 - self.epsilon
         self.Q[state][action] = self.Q[state][action] + alpha * (reward + gamma * sum([prob[a] * self.Q[stateprime][a] 
                                                                                      for a in range(self.n_actions)]) - self.Q[state][action])
-    
     def save(self):
         files = [f for f in listdir("./ExpectedSARSA") if isfile(join("./ExpectedSARSA", f))]
         np.savetxt(f'./ExpectedSARSA/ExpectedSARSA{len(files)}.csv', self.Q, delimiter=',')

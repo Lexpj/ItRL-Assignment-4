@@ -1,15 +1,17 @@
-# ItRL: Assignment 4
-# Leiden University
-# Maksim Terentev and Lex Jansssens
-# Last changes 21-05-2023
+"""
+ItRL: Assignment 4
+Leiden University
+Lex Jansssens and Maksim Terentev
+Last changes 26-05-2023
+"""
 
 import sys
 import numpy as np
+import matplotlib.pyplot as plt
 
 from Environment import *
 from Agents import *
-from Helper import LearningCurvePlot, ComparisonPlot, smooth
-import matplotlib.pyplot as plt
+from Helper import smooth
 from matplotlib import cm
 
 ## Runs an experiment n_episodes times for n_repetitions for the agent_type ##
@@ -111,7 +113,7 @@ def run_repetitions(agent_type, ratio, n_episodes = 1000, n_repetitions = 100, a
     
     return (cumulative_rewards.mean(axis = 0), cumulative_pathlength.mean(axis = 0))
 
-## Heatmap
+## Plots the heatmap for the agent_type ##
 def heatmap(agent_type):  
     """
     Note that it will make a heatmap based on random agents present in some folder
@@ -119,20 +121,14 @@ def heatmap(agent_type):
     # Initialize environment and Q-array
     env = TomAndJerryEnvironment(render_mode=None)
     s = env.reset()
-    
     agents = {
         'Q-learning': QLearningAgent(n_actions=env.action_size(), n_states=env.state_size(), epsilon=0.01),
         'SARSA': SARSAAgent(n_actions=env.action_size(), n_states=env.state_size(), epsilon=0.01),
-        'Expected SARSA': ExpectedSARSAAgent(n_actions=env.action_size(), n_states=env.state_size(), epsilon=0.01)
-    }
-
-
+        'Expected SARSA': ExpectedSARSAAgent(n_actions=env.action_size(), n_states=env.state_size(), epsilon=0.01)}
     agent = agents[agent_type]
     agent.load()
     done = False
-
     heatmap = [0]*env.state_size()
-
     # Run 1000 repetitions with randomly picked agents.
     for i in range(10000):
         agent.load()
@@ -140,12 +136,9 @@ def heatmap(agent_type):
         done = False
         while not done:
             heatmap[s] += 1
-
             a = agent.select_action(s)   
             s_next,r,done,info = env.step(a) # execute action in the environment
-
             s = s_next
-
     heatmap = np.array(heatmap)
     # Normalize
     heatmap = (heatmap - min(heatmap))/(max(heatmap)-min(heatmap))
@@ -153,18 +146,15 @@ def heatmap(agent_type):
     heatmap[0] = 0
     # Reshape into 4x4
     heatmap = np.reshape(heatmap, (4,4))
-
     plt.imshow(heatmap, cmap='autumn')
     plt.show()
 
-## 3D plot of episodes and ratio's as a function to yield pathlength and rewards
+## 3D plot of episodes and ratio's as a function to yield the path length and cumulative rewards ##
 def make3d(agent_type):
-
     # Get the ranges to make data
     X = np.arange(100,1000,1)
     Y = np.arange(1,16,2)
     X, Y = np.meshgrid(X, Y)
-
     # Run the experiment
     reward, path = [],[]
     for i in range(1, 16, 2):
@@ -172,7 +162,6 @@ def make3d(agent_type):
         reward.append(smooth(r[100:],29))
         path.append(smooth(p[100:],29))
     
-
     # Plot the surface for path length
     Z = np.array(path)
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
@@ -184,7 +173,6 @@ def make3d(agent_type):
     ax.invert_xaxis()
     fig.colorbar(surf, shrink=0.5, aspect=5)
     plt.show()
-
 
     # Plot the surface for rewards
     Z = np.array(reward)
@@ -199,56 +187,19 @@ def make3d(agent_type):
     plt.show()
 
 
-## Plotting the averaged cumulative reward for alpha = 0.1 ##
-def averaged_learning_curve_plot(agent_type, n_repetitions = 100, n_episodes = 1000):
-    cumulative_rewards = run_repetitions(agent_type = agent_type, n_repetitions = n_repetitions, n_episodes = n_episodes)
-    avg_cumulative_rewards = cumulative_rewards.mean(axis = 0)
-
-    smoothing_window = 29
-    plot = LearningCurvePlot()
-    plot.add_curve(smooth(y = avg_cumulative_rewards, window = smoothing_window), label = 'alpha = 0.1')
-    plot.save(name = agent_type + '_avg_rewards.png')
-    
-## Plotting the averaged cumulative reward for various alpha values ##
-def varying_alpha_plot(agent_type, n_repetitions = 100, n_episodes = 1000, alpha = [0.01, 0.1, 0.5, 0.9]):
-    smoothing_window = 29
-    plot = LearningCurvePlot()
-    for i in range(len(alpha)):
-        cumulative_rewards = run_repetitions(agent_type = agent_type, n_repetitions = n_repetitions, n_episodes = n_episodes, alpha = alpha[i])
-        avg_cumulative_rewards = cumulative_rewards.mean(axis = 0)
-        plot.add_curve(smooth(y = avg_cumulative_rewards, window = smoothing_window), label = 'alpha = ' + str(alpha[i]))
-    plot.save(name = agent_type + '_various_alpha.png')      
-    
-## Plotting the averaged cumulative rewards for all three agents ##
-def optimal_agents_plot(n_repetitions = 10, n_episodes = 500, optimal_alpha = [0.1, 0.1, 0.1]):
-    cum_rewards_QLearning = run_repetitions(agent_type = "Q-learning", n_repetitions = n_repetitions, n_episodes = n_episodes, epsilon = optimal_alpha[0])
-    avg_cumulative_rewards_QLearning = cum_rewards_QLearning.mean(axis = 0)
-    cum_rewards_SARSA = run_repetitions(agent_type = "SARSA", n_repetitions = n_repetitions, n_episodes = n_episodes, epsilon = optimal_alpha[1])
-    avg_cumulative_rewards_SARSA = cum_rewards_SARSA.mean(axis = 0)
-    cum_rewards_ExpectedSARSA = run_repetitions(agent_type = "Expected SARSA", n_repetitions = n_repetitions, n_episodes = n_episodes, epsilon = optimal_alpha[2])
-    avg_cumulative_rewards_ExpectedSARSA = cum_rewards_ExpectedSARSA.mean(axis = 0)
-    
-    smoothing_window = 29
-    plot = LearningCurvePlot() # Plot the learning curves
-    plot.add_curve(smooth(y = avg_cumulative_rewards_QLearning, window = smoothing_window), label = 'Q-learning')
-    plot.add_curve(smooth(y = avg_cumulative_rewards_SARSA, window = smoothing_window), label = 'SARSA')
-    plot.add_curve(smooth(y = avg_cumulative_rewards_ExpectedSARSA, window = smoothing_window), label = 'Expected SARSA')
-    plot.save(name = 'OptimalAgents.png')
-    
-
 def main():
-    # Averaged learning plots
-    # averaged_learning_curve_plot(agent_type = 'Q-learning', n_repetitions = 1, n_episodes = 100)
-    #averaged_learning_curve_plot(agent_type = 'SARSA', n_repetitions = 1, n_episodes = 1000)
-    #averaged_learning_curve_plot(agent_type = 'Expected SARSA', n_episodes = 1000)
+    # Please, choose the ratio
+    #run_repetitions("Q-learning", ratio = 1)
+    #run_repetitions("SARSA", ratio = 1)
+    #run_repetitions("Expected SARSA, ratio = 1)
     
-    # Varying alpha values plots
-    #varying_alpha_plot(agent_type = 'Q-learning', n_episodes = 5000)
-    #varying_alpha_plot(agent_type = 'SARSA')
-    #varying_alpha_plot(agent_type = 'Expected SARSA')
+    heatmap("Q-learning")
+    #heatmap("SARSA")
+    #heatmap("Expected SARSA")
     
-    optimal_agents_plot(n_episodes = 1000)
-
+    make3d("Q-learning")
+    #make3d("SARSA")
+    #make3d("Expected SARSA")
 
 if __name__ == '__main__':
     main()

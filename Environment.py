@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+ItRL: Assignment 4
+Leiden University
+Lex Jansssens and Maksim Terentev
+Last changes 26-05-2023
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
