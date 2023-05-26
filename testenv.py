@@ -8,7 +8,7 @@ from Agents import *
 from Helper import LearningCurvePlot, ComparisonPlot, smooth
 
 
-def run_repetitions(agent_type, ratio, n_episodes = 1000, n_repetitions = 10, alpha = 0.1, gamma = 1.0, epsilon = 0.01):
+def run_repetitions(agent_type, ratio, n_episodes = 1000, n_repetitions = 100, alpha = 0.1, gamma = 1.0, epsilon = 0.01):
     # Initialize the cumulative rewards array and the environment
     cumulative_rewards = np.zeros((n_repetitions, n_episodes))
     cumulative_pathlength = np.zeros((n_repetitions, n_episodes))
@@ -40,7 +40,9 @@ def run_repetitions(agent_type, ratio, n_episodes = 1000, n_repetitions = 10, al
                     # Update the Q-table
                     agent.update(s, a, r, s_prime, alpha = alpha, gamma = gamma)
                     s = s_prime
-                    #env.render()
+                    
+            agent.save()
+
     # SARSA agent
     elif agent_type == "SARSA":
         # Conduct the experiment n_repetitions
@@ -70,7 +72,9 @@ def run_repetitions(agent_type, ratio, n_episodes = 1000, n_repetitions = 10, al
                     agent.update(s, a, r, s_prime, a_prime, alpha = alpha, gamma = gamma)
                     s = s_prime
                     a = a_prime
-                    #env.render()          
+
+            agent.save()
+
     # Expected SARSA agent                
     elif agent_type == "Expected SARSA":
         # Conduct the experiment n_repetitions
@@ -96,40 +100,102 @@ def run_repetitions(agent_type, ratio, n_episodes = 1000, n_repetitions = 10, al
                     s_prime = env.state
                     # Update the Q-table
                     agent.update(s, a, r, s_prime, alpha = alpha, gamma = gamma)
-                    s = s_prime        
+                    s = s_prime  
 
-    agent.save()
+            agent.save()
+    
     return (cumulative_rewards.mean(axis = 0), cumulative_pathlength.mean(axis = 0))
 
 
-fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+def heatmap():    
+    # Initialize environment and Q-array
+    env = TomAndJerryEnvironment(render_mode=None)
+    s = env.reset()
 
-# Make data.
-X = np.arange(100,1000,1)
-Y = np.arange(1,12,2)
-X, Y = np.meshgrid(X, Y)
+    agent = ExpectedSARSAAgent(n_actions=env.action_size(), n_states=env.state_size(), epsilon=0.01)
+    agent.load()
+    done = False
 
-# Z = np.array([smooth(run_repetitions('Q-learning',i)[1][100:],29) for i in range(1,12,2)])
-reward, path = [],[]
-for i in range(2, 3, 2):
-    r, p = smooth(run_repetitions('Q-learning',i),29)
-    reward.append(r[100:])
-    path.append(p[100:])
-exit()
-Z = np.array(reward)
-print(Z)
+    heatmap = [0]*env.state_size()
+
+    # Test
+    for i in range(10000):
+        agent.load()
+        s = env.reset()
+        done = False
+        while not done:
+            #a = int(input())
+            heatmap[s] += 1
+
+            a = agent.select_action(s)   
+            s_next,r,done,info = env.step(a) # execute action in the environment
+
+            s = s_next
+
+    heatmap = np.array(heatmap)
+    heatmap = (heatmap - min(heatmap))/(max(heatmap)-min(heatmap))
+    heatmap[0] = 0
+    heatmap = np.reshape(heatmap, (4,4))
+    print(heatmap)
+
+    plt.imshow(heatmap, cmap='autumn')
+    plt.show()
 
 
-# Plot the surface.
-surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
-                       linewidth=0, antialiased=False)
+def make3d():
+    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+
+    # Make data.
+    X = np.arange(100,1000,1)
+    Y = np.arange(1,16,2)
+    X, Y = np.meshgrid(X, Y)
+
+    # Z = np.array([smooth(run_repetitions('Q-learning',i)[1][100:],29) for i in range(1,12,2)])
+    reward, path = [],[]
+    for i in range(15, 16, 2):
+        r, p = run_repetitions('Expected SARSA',i)
+        reward.append(smooth(r[100:],29))
+        path.append(smooth(p[100:],29))
+    Z = np.array(path)
 
 
-# ax.set_zlim(5,20)
+    # Plot the surface.
+    surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
+                        linewidth=0, antialiased=False)
+    ax.set_xlabel("Episodes")
+    ax.set_ylabel("Ratio")
+    ax.set_zlabel("Path length")
 
-# Add a color bar which maps values to colors.
-fig.colorbar(surf, shrink=0.5, aspect=5)
+    ax.invert_xaxis()
 
-plt.show()
+    # ax.set_zlim(5,20)
+
+    # Add a color bar which maps values to colors.
+    fig.colorbar(surf, shrink=0.5, aspect=5)
+
+    plt.show()
 
 
+
+    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+
+    Z = np.array(reward)
+    print(Z)
+    # Plot the surface.
+    surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm,
+                        linewidth=0, antialiased=False)
+    ax.set_xlabel("Episodes")
+    ax.set_ylabel("Ratio")
+    ax.set_zlabel("Reward")
+
+    ax.invert_xaxis()
+
+    # ax.set_zlim(5,20)
+
+    # Add a color bar which maps values to colors.
+    fig.colorbar(surf, shrink=0.5, aspect=5)
+
+    plt.show()
+
+make3d()
+heatmap()

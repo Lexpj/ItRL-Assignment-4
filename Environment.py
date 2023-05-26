@@ -247,42 +247,6 @@ class TomAndJerryEnvironment:
         self.fig.canvas.flush_events()
                 
 
-
-def test():
-    # Hyperparameters
-    n_test_steps = 25
-    step_pause = 0.5
-    
-    # Initialize environment and Q-array
-    env = TomAndJerryEnvironment(render_mode=None)
-    s = env.reset()
-    Q_sa = np.zeros((env.n_states,env.n_actions)) # Q-value array of flat zeros
-
-    agent = QLearningAgent(n_actions=env.action_size(), n_states=env.state_size(), epsilon=0.01)
-    agent.load()
-    done = False
-
-    heatmap = [0]*env.state_size()
-
-    # Test
-    for i in range(1000):
-        while not done:
-            #a = int(input())
-            heatmap[s] += 1
-
-            a = agent.select_action(s)   
-            s_next,r,done,info = env.step(a) # execute action in the environment
-            if done:
-                s = env.reset()
-            else:
-                s = s_next
-
-    heatmap = np.array(heatmap)
-    heatmap = np.reshape(heatmap, (4,4))
-    print(heatmap)
-
-    plt.imshow(heatmap, cmap='autumn')
-    plt.show()
     
 if __name__ == '__main__':
-    test()
+    pass

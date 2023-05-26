@@ -1,4 +1,6 @@
 import numpy as np
+from os import listdir
+from os.path import isfile, join
 
 class QLearningAgent(object):
 
@@ -18,10 +20,12 @@ class QLearningAgent(object):
         self.Q[state][action] = self.Q[state][action] + alpha * (reward + gamma * np.max(self.Q[stateprime]) - self.Q[state][action])
     
     def save(self):
-        np.savetxt('QLearning.csv', self.Q, delimiter=',')
+        files = [f for f in listdir("./Qlearning") if isfile(join("./Qlearning", f))]
+        np.savetxt(f'./Qlearning/QLearning{len(files)}.csv', self.Q, delimiter=',')
 
-    def load(self, path="QLearning.csv"):
-        self.Q = np.loadtxt(path, delimiter=',')
+    def load(self, path="Qlearning.csv"):
+        files = [f for f in listdir("./Qlearning") if isfile(join("./Qlearning", f))]
+        self.Q = np.loadtxt("./QLearning/"+np.random.choice(files), delimiter=',')
 
 class SARSAAgent(object):
 
@@ -41,10 +45,12 @@ class SARSAAgent(object):
         self.Q[state][action] = self.Q[state][action] + alpha * (reward + gamma * self.Q[stateprime][actionprime] - self.Q[state][action])
     
     def save(self):
-        np.savetxt('SARSA.csv', self.Q, delimiter=',')
+        files = [f for f in listdir("./SARSA") if isfile(join("./SARSA", f))]
+        np.savetxt(f'./SARSA/SARSA{len(files)}.csv', self.Q, delimiter=',')
 
     def load(self, path="SARSA.csv"):
-        self.Q = np.loadtxt(path, delimiter=',')
+        files = [f for f in listdir("./SARSA") if isfile(join("./SARSA", f))]
+        self.Q = np.loadtxt("./SARSA/"+np.random.choice(files), delimiter=',')
 
 
 class ExpectedSARSAAgent(object):
@@ -69,7 +75,9 @@ class ExpectedSARSAAgent(object):
                                                                                      for a in range(self.n_actions)]) - self.Q[state][action])
     
     def save(self):
-        np.savetxt('ExpectedSARSA.csv', self.Q, delimiter=',')
+        files = [f for f in listdir("./ExpectedSARSA") if isfile(join("./ExpectedSARSA", f))]
+        np.savetxt(f'./ExpectedSARSA/ExpectedSARSA{len(files)}.csv', self.Q, delimiter=',')
 
     def load(self, path="ExpectedSARSA.csv"):
-        self.Q = np.loadtxt(path, delimiter=',')
+        files = [f for f in listdir("./ExpectedSARSA") if isfile(join("./ExpectedSARSA", f))]
+        self.Q = np.loadtxt("./ExpectedSARSA/"+np.random.choice(files), delimiter=',')
