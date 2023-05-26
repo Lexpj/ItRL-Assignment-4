@@ -6,8 +6,8 @@ Last changes 26-05-2023
 """
 
 import numpy as np
-from os import listdir
-from os.path import isfile, join
+from os import listdir, mkdir
+from os.path import isfile, join, exists
 
 class QLearningAgent(object):
 
@@ -27,6 +27,8 @@ class QLearningAgent(object):
         self.Q[state][action] = self.Q[state][action] + alpha * (reward + gamma * np.max(self.Q[stateprime]) - self.Q[state][action])
     
     def save(self):
+        if not exists("./Qlearning"):
+            mkdir("./Qlearning")
         files = [f for f in listdir("./Qlearning") if isfile(join("./Qlearning", f))]
         np.savetxt(f'./Qlearning/QLearning{len(files)}.csv', self.Q, delimiter=',')
 
@@ -52,6 +54,8 @@ class SARSAAgent(object):
         self.Q[state][action] = self.Q[state][action] + alpha * (reward + gamma * self.Q[stateprime][actionprime] - self.Q[state][action])
     
     def save(self):
+        if not exists("./SARSA"):
+            mkdir("./SARSA")
         files = [f for f in listdir("./SARSA") if isfile(join("./SARSA", f))]
         np.savetxt(f'./SARSA/SARSA{len(files)}.csv', self.Q, delimiter=',')
 
@@ -81,6 +85,8 @@ class ExpectedSARSAAgent(object):
         self.Q[state][action] = self.Q[state][action] + alpha * (reward + gamma * sum([prob[a] * self.Q[stateprime][a] 
                                                                                      for a in range(self.n_actions)]) - self.Q[state][action])
     def save(self):
+        if not exists("./ExpectedSARSA"):
+            mkdir("./ExpectedSARSA")
         files = [f for f in listdir("./ExpectedSARSA") if isfile(join("./ExpectedSARSA", f))]
         np.savetxt(f'./ExpectedSARSA/ExpectedSARSA{len(files)}.csv', self.Q, delimiter=',')
 

@@ -189,7 +189,7 @@ def make3d(agent_type):
 
 def main():
     # Please, choose the ratio
-    # run_repetitions("Q-learning", ratio = 1)
+    run_repetitions("Q-learning", ratio = 1)
     #run_repetitions("SARSA", ratio = 1)
     #run_repetitions("Expected SARSA, ratio = 1)
     
