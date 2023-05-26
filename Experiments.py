@@ -11,8 +11,12 @@ import matplotlib.pyplot as plt
 
 from Environment import *
 from Agents import *
-from Helper import smooth
 from matplotlib import cm
+from scipy.signal import savgol_filter
+
+## Smoothing function
+def smooth(y, window, poly=1):
+    return savgol_filter(y,window,poly)
 
 ## Runs an experiment n_episodes times for n_repetitions for the agent_type ##
 def run_repetitions(agent_type, ratio, n_episodes = 1000, n_repetitions = 100, alpha = 0.1, gamma = 1.0, epsilon = 0.01):
