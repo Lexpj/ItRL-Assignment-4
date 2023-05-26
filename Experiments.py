@@ -189,17 +189,18 @@ def make3d(agent_type):
 
 def main():
     # Please, choose the ratio
-    #run_repetitions("Q-learning", ratio = 1)
+    # run_repetitions("Q-learning", ratio = 1)
     #run_repetitions("SARSA", ratio = 1)
     #run_repetitions("Expected SARSA, ratio = 1)
     
-    heatmap("Q-learning")
+    # heatmap("Q-learning")
     #heatmap("SARSA")
     #heatmap("Expected SARSA")
     
-    make3d("Q-learning")
+    # make3d("Q-learning")
     #make3d("SARSA")
     #make3d("Expected SARSA")
+    pass
 
 if __name__ == '__main__':
     main()
